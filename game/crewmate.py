@@ -173,7 +173,7 @@ class CrewMate(Context, superclasses.CombatCritter):
             if len(cmd_list) > 1:
                 i = 0
                 while i < len(config.the_player.inventory):
-                    if config.the_player.inventory[i].name == cmd_list[1]:
+                    if config.the_player.inventory[i].name.lower() == cmd_list[1]:
                         found = config.the_player.inventory.pop(i)
                         self.items.append(found)
                         self.items.sort()
@@ -187,7 +187,7 @@ class CrewMate(Context, superclasses.CombatCritter):
             if len(cmd_list) > 1:
                 i = 0
                 while i < len(self.items):
-                    if self.items[i].name == cmd_list[1]:
+                    if self.items[i].name.lower() == cmd_list[1]:
                         found = self.items.pop(i)
                         config.the_player.inventory.append(found)
                         config.the_player.inventory.sort()
