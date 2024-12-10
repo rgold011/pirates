@@ -264,8 +264,14 @@ class Dark_Cave (location.SubLocation):
             
             else:
                 print("Wrong, Darts are fired from all directions at you!") 
-                for c in config.the_player.get_pirates():
-                    c.inflict_damage(10)  
+                for c in config.the_player.get_pirates(deathcause):
+                    if (c.isLucky() == True):
+                        damage = 1
+                    else:
+                        damage = 10
+               
+
+                    c.inflict_damage(damage, "died from the darts")  
                 # ADD DAMAGE TO PLAYERS
     def enter(self):
         display.announce("You enter the cave.")
