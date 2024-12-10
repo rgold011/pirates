@@ -10,6 +10,7 @@ import random
 
 
 
+
 class rgold011_ISLAND(location.Location):
     def __init__ (self, x, y, w):
         super().__init__(x, y, w)
@@ -160,7 +161,7 @@ class Coconuts(event.Event):
         result["message"] = msg
         result["newevents"] = [ self ]
         return result
-
+#
 
  #Abondoned Tower beach will be East of the starting cove. You can enter the tower, or go back.      
 class Beach_Abandoned_Tower (location.SubLocation):
@@ -221,27 +222,76 @@ class Dark_Cave (location.SubLocation):
     def __init__(self, m):
         super().__init__(m)
         self.name = "Dark Cave"
-        self.verbs = ['exit']
+        self.verbs['exit'] = self
+    def cave_puzzle(self):
+        messages = {1: "From the North a cool breeze comes forth",
+            2: "From the East comes the cry of a beast",
+            3: "From the south comes a storm to feed the islands drouth",
+            4: "From the West comes a laugh..."}
+        symbols = {1: "❄️",
+            2: "🐺",
+            3: "🌊",
+            4: "😂"}
+        num = random.randint(1, 4)
+        print(messages[num])
+        print("\nYou walk upon into the cave and are met with four pedestals. It looks like each one has a symbol on it. You must turn one of the pesdestals:")
+        print("a. ❄️")
+        print("b. 🐺")
+        print("c. 🌊")
+        print("d. 😂")
+        answer = symbols[num]
+        while True:
+            guess = input("Your answer (a, b, c, or d): ").lower()
+
+            if guess == 'a' and answer == "❄️":
+                print("You picked the correct one!")
+                config.the_player.next_loc = self.main_location.locations['Glade']
+                config.the_player.go = True
+                break
+            elif guess == 'b' and answer == "🐺":
+                print("You picked the correct one!")
+                config.the_player.next_loc = self.main_location.locations['Glade']
+                config.the_player.go = True
+                break
+            elif guess == 'c' and answer == "🌊":
+                print("You picked the correct one!")
+                config.the_player.next_loc = self.main_location.locations['Glade']
+                config.the_player.go = True
+                break
+            elif guess == 'd' and answer == "😂":
+                print("You picked the correct one!")
+                break
+            
+            else:
+                print("Wrong, Darts are fired from all directions at you!") 
+                for c in config.the_player.get_pirates():
+                    c.inflict_damage(10)  
+                # ADD DAMAGE TO PLAYERS
     def enter(self):
-        display.announce("You enter the cave. PUZZLE OPTION")
+        display.announce("You enter the cave.")
+        self.cave_puzzle()
     def process_verb (self, verb, cmd_list, nouns):
         if (verb == "exit"):
             config.the_player.next_loc = self.main_location.locations['Beach_In_Cove']
             config.the_player.go = True
             display.announce('You exit the cave and travel back to the cove')
+
+    
 #The Glade will only be acessible if you beat the cave puzzle. It will contain an exclusive treasure/food.
 class Glade (location.SubLocation):
     def __init__ (self, m):
         super().__init__(m)
         self.name = "Glade"
-        self.verbs = ['exit']
+        self.verbs['exit'] = self
     def enter(self):
         display.announce('You slide out of the cave, and into a hidden glade on the island. There is a treasure chest nearby')
+        config.the_player.add_to_inventory(Feberge_Egg)
+        display.announce('You open the chest and find a precious feberge egg! You can n\'exitn\' the glade now')
     def process_verb(self, verb, cmd_list, nouns):
         if (verb == "exit"):
             config.the_player.next.loc = self.main_location.locations['Coconut_Tree_Beach']
             config.the_player.go = True
-            display.announce('You find a pathway leading to the North side of the island, it is very steep, you will not be able to go back')
+            display.announce('You find a pathway leading to the North side of the island, it is very steep going down, you will not be able to go back')
 # The coconut tree beach will contain a bountiful amount of food. 
 class Coconut_Tree_Beach(location.SubLocation):
     def __init__ (self, m):
