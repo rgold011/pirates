@@ -76,6 +76,14 @@ class Temple_Sentinel(combat.Monster): #'boss' enemy
         attacks['smash'] = ['smash', random.randrange(25,100), (10,20)]
         super().__init__(name, random.randrange(100,150), attacks, 100 + random.randrange(-30,30))
         self.type_name = "Temple Sentinel"
+    
+    def pickTargets(self, action, attacker, allies, enemies):
+        print(action.name)
+        if action.name == 'beam':
+
+            return [random.sample(enemies, 2)]
+
+
 #New enemy 
 class Giant_Bat(combat.Monster):  
     def __init__(self, name):
