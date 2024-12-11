@@ -103,7 +103,7 @@ class Sentinel_Mace(item.Item):
     def __init__(self):
         super().__init__('Sentinel-Mace', 1000)
         self.damage = (100)
-        self.skill = 'swords'
+        self.skill = 'melee'
         self.verb = 'hit'
         self.verb2 = 'hits'
 #Enemy
@@ -156,14 +156,16 @@ class Coconuts(event.Event):
     petemade = False
     def __init__ (self):
         self.name = 'Coconut Collection'
+        
     def process(self, world):
         result = {}
         n_appearing = random.randrange(5,25)
         msg = f"There are {n_appearing} coconuts on this beach, a good souce of food!"
         config.the_player.ship.food += n_appearing
         result["message"] = msg
-        result["newevents"] = [ self ]
+        result["newevents"] = []
         return result
+    
 
 
  #Abondoned Tower beach will be East of the starting cove. You can enter the tower, or go back.      
@@ -194,7 +196,11 @@ class Tower (location.SubLocation):
         self.event_chance = 100
         self.events.append(Giant_Bat_Attack())
     def enter (self):
-        display.announce ("You walk inside the tower, there is a musket racked on the wall.")
+        if self.item_in_tower != None:
+
+            display.announce ("You walk inside the tower, there is a musket racked on the wall.")
+        else:
+            display.announce("You walk inside the tower...")
     def process_verb (self, verb, cmd_list, nouns):
         if (verb == 'exit'):
             config.the_player.next_loc = self.main_location.locations['Beach_Abandoned_Tower']
@@ -264,6 +270,7 @@ class Dark_Cave (location.SubLocation):
                 break
             elif guess == 'd' and answer == "😂":
                 print("You picked the correct one!")
+
                 break
             
             else:
@@ -295,15 +302,34 @@ class Glade (location.SubLocation):
         super().__init__(m)
         self.name = "Glade"
         self.verbs['exit'] = self
+        self.verbs['take'] = self
+        self.item_in_chest = Feberge_Egg()
     def enter(self):
-        display.announce('You slide out of the cave, and into a hidden glade on the island. There is a treasure chest nearby, You go to open it...')
-        config.the_player.add_to_inventory([Feberge_Egg()])
-        display.announce('You open the chest and find a precious feberge egg! You can exit the glade now...')
+        if self.item_in_chest != None:
+            display.announce('You slide out of the cave, and into a hidden glade on the island. There is a treasure chest nearby, You can take something from it.')
+        else:
+            display.announce('You slide out of the cave again, and into the glade.')
+        
     def process_verb(self, verb, cmd_list, nouns):
         if (verb == "exit"):
             config.the_player.next_loc = self.main_location.locations['Coconut_Tree_Beach']
             config.the_player.go = True
             display.announce('You find a pathway leading to the North side of the island, it is very steep going down, you will not be able to go back...')
+        elif (verb == 'take'):
+            if self.item_in_chest == None:
+                display.announce('There is nothing to take')
+            elif len(cmd_list) > 1:
+                at_least_one = False
+                item = self.item_in_chest
+                if item != None and (cmd_list[1] == item.name or cmd_list[1] == 'all'):
+                    display.announce('You take a precious feberge egg from the chest!!')
+                    config.the_player.add_to_inventory([item])
+                    self.item_in_chest = None
+                    config.the_player.go = True
+                    at_least_one = True
+                if at_least_one == False:
+                    display.announce('What? Nothing here...')
+
 # The coconut tree beach will contain a bountiful amount of food. 
 class Coconut_Tree_Beach(location.SubLocation):
     def __init__ (self, m):
@@ -312,6 +338,7 @@ class Coconut_Tree_Beach(location.SubLocation):
         self.verbs['south'] = self
         self.event_chance = 100
         self.events.append(Coconuts())
+        
     def enter(self):
         display.announce('You walk to the North end of the island. There is a beach with lots of coconuts....')
     def process_verb(self, verb, cmd_list, nouns):
