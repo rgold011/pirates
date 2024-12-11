@@ -68,7 +68,7 @@ class Beach_In_Cove (location.SubLocation):
 ###############################################
 ##### SUBLOCATIONS AND SUPPORTING CLASSES #####
 ###############################################
-
+#Boss Enemy
 class Temple_Sentinel(combat.Monster): #'boss' enemy
     def __init__(self, name):
         attacks = {}
@@ -76,7 +76,7 @@ class Temple_Sentinel(combat.Monster): #'boss' enemy
         attacks['smash'] = ['smash', random.randrange(25,100), (10,20)]
         super().__init__(name, random.randrange(100,150), attacks, 100 + random.randrange(-30,30))
         self.type_name = "Temple Sentinel"
-
+#New enemy 
 class Giant_Bat(combat.Monster):  
     def __init__(self, name):
         attacks = {}
@@ -84,6 +84,7 @@ class Giant_Bat(combat.Monster):
         attacks['hit'] = ["hits", random.randrange(75, 80), (2,10)]
         super().__init__(name, random.randrange(7,20), attacks, 100 + random.randrange(-10, 50)) #1st, number of HP, 2nd, range of speed/
         self.type_name = "Giant Bat"
+#New weapon
 class Musket(item.Item): 
     def __init__(self):
         super().__init__('musket', 500) #500 is the value in shillings, total value of all treasure is generated at the end of the game.
@@ -93,18 +94,19 @@ class Musket(item.Item):
         self.skill = 'guns'
         self.verb = 'shoot'
         self.verb2 = 'shoots'
-
+#Treasure item
 class Feberge_Egg(item.Item):
     def __init__ (self):
         super().__init__('Feberge Egg', 2500)
+#Boss Enemy reward
 class Sentinel_Mace(item.Item):
     def __init__(self):
         super().__init__('Sentinel-Mace', 1000)
         self.damage = (100)
-        self.skill = 'bludgeons'
+        self.skill = 'swords'
         self.verb = 'hit'
         self.verb2 = 'hits'
-
+#Enemy
 class Giant_Bat_Attack (event.Event):
     petemade = False
     def __init__ (self):
@@ -149,6 +151,7 @@ class Temple_Sentinel_Attack(event.Event):
         config.the_player.add_to_inventory([weapon_gained])
         display.announce('You pick up the weapon the temple sentinel was using... "Sentinel-Mace"')
         return result
+#Event that rewards food
 class Coconuts(event.Event):
     petemade = False
     def __init__ (self):
@@ -161,7 +164,7 @@ class Coconuts(event.Event):
         result["message"] = msg
         result["newevents"] = [ self ]
         return result
-#
+
 
  #Abondoned Tower beach will be East of the starting cove. You can enter the tower, or go back.      
 class Beach_Abandoned_Tower (location.SubLocation):
@@ -188,7 +191,7 @@ class Tower (location.SubLocation):
         self.verbs['exit'] = self
         self.verbs['take'] = self
         self.item_in_tower = Musket()
-        self.event_chance = 50
+        self.event_chance = 100
         self.events.append(Giant_Bat_Attack())
     def enter (self):
         display.announce ("You walk inside the tower, there is a musket racked on the wall.")
@@ -210,7 +213,7 @@ class Tower (location.SubLocation):
                     config.the_player.go = True
                     at_least_one = True
                 if at_least_one == False:
-                    display.announce('What? Nothing there')
+                    display.announce('What? Nothing there...')
 
 
 
@@ -223,10 +226,11 @@ class Dark_Cave (location.SubLocation):
         super().__init__(m)
         self.name = "Dark Cave"
         self.verbs['exit'] = self
+        self.verbs['inspect'] = self
     def cave_puzzle(self):
-        messages = {1: "From the North a cool breeze comes forth",
-            2: "From the East comes the cry of a beast",
-            3: "From the south comes a storm to feed the islands drouth",
+        messages = {1: "From the North a cool breeze comes forth...",
+            2: "From the East comes the cry of a beast...",
+            3: "From the south comes a storm to feed the islands drouth...",
             4: "From the West comes a laugh..."}
         symbols = {1: "❄️",
             2: "🐺",
@@ -263,8 +267,8 @@ class Dark_Cave (location.SubLocation):
                 break
             
             else:
-                print("Wrong, Darts are fired from all directions at you!") 
-                for c in config.the_player.get_pirates(deathcause):
+                print("Wrong, Darts are fired from all directions at you!!") 
+                for c in config.the_player.get_pirates():
                     if (c.isLucky() == True):
                         damage = 1
                     else:
@@ -274,30 +278,32 @@ class Dark_Cave (location.SubLocation):
                     c.inflict_damage(damage, "died from the darts")  
                 # ADD DAMAGE TO PLAYERS
     def enter(self):
-        display.announce("You enter the cave.")
-        self.cave_puzzle()
+        display.announce("You enter the cave. There are four pedestals in here. Perhaps you should inspect them.")
     def process_verb (self, verb, cmd_list, nouns):
         if (verb == "exit"):
             config.the_player.next_loc = self.main_location.locations['Beach_In_Cove']
             config.the_player.go = True
-            display.announce('You exit the cave and travel back to the cove')
+            display.announce('You exit the cave and travel back to the cove..')
+        if (verb == "inspect"):
+            self.cave_puzzle()
+            config.the_player.go = True
 
     
-#The Glade will only be acessible if you beat the cave puzzle. It will contain an exclusive treasure/food.
+#The Glade will only be acessible if you beat the cave puzzle. It will contain an exclusive treasure, the feberge egg 
 class Glade (location.SubLocation):
     def __init__ (self, m):
         super().__init__(m)
         self.name = "Glade"
         self.verbs['exit'] = self
     def enter(self):
-        display.announce('You slide out of the cave, and into a hidden glade on the island. There is a treasure chest nearby')
-        config.the_player.add_to_inventory(Feberge_Egg)
-        display.announce('You open the chest and find a precious feberge egg! You can n\'exitn\' the glade now')
+        display.announce('You slide out of the cave, and into a hidden glade on the island. There is a treasure chest nearby, You go to open it...')
+        config.the_player.add_to_inventory([Feberge_Egg()])
+        display.announce('You open the chest and find a precious feberge egg! You can exit the glade now...')
     def process_verb(self, verb, cmd_list, nouns):
         if (verb == "exit"):
-            config.the_player.next.loc = self.main_location.locations['Coconut_Tree_Beach']
+            config.the_player.next_loc = self.main_location.locations['Coconut_Tree_Beach']
             config.the_player.go = True
-            display.announce('You find a pathway leading to the North side of the island, it is very steep going down, you will not be able to go back')
+            display.announce('You find a pathway leading to the North side of the island, it is very steep going down, you will not be able to go back...')
 # The coconut tree beach will contain a bountiful amount of food. 
 class Coconut_Tree_Beach(location.SubLocation):
     def __init__ (self, m):
@@ -307,7 +313,7 @@ class Coconut_Tree_Beach(location.SubLocation):
         self.event_chance = 100
         self.events.append(Coconuts())
     def enter(self):
-        display.announce('You walk to the North end of the island. There is a beach with lots of coconuts.')
+        display.announce('You walk to the North end of the island. There is a beach with lots of coconuts....')
     def process_verb(self, verb, cmd_list, nouns):
         if (verb == 'south'):
             config.the_player.next_loc = self.main_location.locations['Great_Temple_Forest']
@@ -321,7 +327,7 @@ class Great_Temple_Forest(location.SubLocation):
         self.verbs['south'] = self
         self.verbs['enter'] = self
     def enter(self):
-        display.announce('You walk into the forest. There is a temple to enter, and also a beach to the north')
+        display.announce('You walk into the forest. There is a temple to enter, and also a beach to the north...')
     def process_verb(self, verb, cmd_list, nouns):
         if (verb == 'north'):
             config.the_player.next_loc = self.main_location.locations['Coconut_Tree_Beach']
@@ -349,9 +355,9 @@ class Great_Temple(location.SubLocation):
         self.event_chance = 75
         self.events.append(Temple_Sentinel_Attack())
     def enter(self):
-        display.announce('You enter the great temple. You have a bad feeling about this.')
+        display.announce('You enter the great temple. You have a bad feeling about this....')
     def process_verb(self, verb, cmd_list, nouns):
         if (verb == 'exit'):
             config.the_player.next_loc = self.main_location.locations['Great_Temple_Forest']
             config.the_player.go = True
-            display.announce('You exit the temple')
+            display.announce('You exit the temple.')
